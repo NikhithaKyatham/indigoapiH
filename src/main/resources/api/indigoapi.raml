@@ -1,0 +1,23 @@
+#%RAML 1.0
+title: indigoApi
+
+types:
+  IndigoFlights: !include Datatypes/IndigoFlights.raml
+
+/indigoFlights:
+  get:
+    queryParameters:
+      source:
+        example: HYD
+      destination:
+        example: MUM
+      doj:
+        example: 30-Sep-2020
+    
+    responses:
+      200:
+        body:
+          application/json:
+             type: IndigoFlights[]
+             example: !include Examples/IndigoFlightsExample.raml
+             

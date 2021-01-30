@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	
+	<!-- <http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="ea858551-43d6-4ee2-a473-cba68f7e1096" >
+		<http:request-connection host="indigo-service.us-e2.cloudhub.io" port="80" />
+	</http:request-config> -->
+	
+	<flow name="indigoFlightsFlow" doc:id="8f9679f5-2a5a-4632-9eb3-4e10de7e30d5" >
+		<logger level="INFO" doc:name="Logger" doc:id="ca0b83b0-8104-49dd-83b5-eed9f769520a" message="indigoFlights flow starts..........."/>
+		<http:request method="GET" doc:name="Request" doc:id="a7889620-5df3-476d-b028-8d55a0405490" config-ref="HTTP_Request_configuration" path="/api/getFlights">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	from : attributes.queryParams.source,
+	to : attributes.queryParams.destination,
+	depatureDate : attributes.queryParams.doj
+}]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="a1bb0e39-3f04-4bb1-b18c-f4c4faab27a3" message="indigoFlights flow ends..................#[payload]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="01df62d5-460e-4e72-b57c-bb6ee447f00c" type="ANY">
+				<ee:transform doc:name="Transform Message" doc:id="00aa94d9-26d4-4995-adb3-59104f9bd69f" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	statusCode: 501,
+	message: "Internal server issue..."
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>
